@@ -1,90 +1,65 @@
-# recipe-book-service
+# Recipe Book Service
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+A Quarkus-based service to manage a recipe book with recipes and ingredients stored in MongoDB and secured with Keycloak. Includes full CRUD, OpenAPI docs, health checks, database migrations (Liquibase for MongoDB), unit tests, and container setup for Docker/Podman and suitable for K8s.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+## Features
+- MongoDB with Panache repositories
+- Liquibase-MongoDB migrations (collections + seed data)
+- Keycloak OIDC security (DevServices and docker-compose)
+- CRUD endpoints
+  - GET/POST/PUT/DELETE /api/ingredients
+  - GET/POST/PUT/DELETE /api/recipes
+- OpenAPI at /q/openapi and Swagger UI at /q/swagger-ui
+- Health endpoints at /q/health
 
-## Running the application in dev mode
+## Run in Dev
+- Start Quarkus with live reload:
+  ./gradlew quarkusDev
+- DevServices will start MongoDB and a Keycloak container automatically. Dev UI: http://localhost:8080/q/dev
 
-You can run your application in dev mode that enables live coding using:
+## Run Tests
+./gradlew test
 
-```shell script
-./gradlew quarkusDev
-```
+Tests mock an admin identity via Quarkus Test Security so security constraints are honored without external Keycloak.
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+## Containerized Setup (Docker/Podman)
+- Build the app image and start infra + app:
+  docker compose up --build
+- Services:
+  - App: http://localhost:8080
+  - MongoDB: localhost:27017
+  - Keycloak: http://localhost:8081
+- Preloaded Keycloak realm: src/main/resources/keycloak/realm-export.json
+  - Realm: recipe-realm
+  - Client: recipe-book-service (secret: secret)
+  - Users:
+    - admin/admin (role: admin)
+    - user/user (role: user)
 
-## Packaging and running the application
+The app is configured via env/JVM opts in docker-compose to connect to MongoDB and Keycloak.
 
-The application can be packaged using:
+## Configuration
+See src/main/resources/application.properties. Important values:
+- quarkus.mongodb.database=recipebook
+- quarkus.liquibase-mongodb.migrate-at-start=true
+- quarkus.oidc.auth-server-url (defaults to http://localhost:8081/realms/recipe-realm)
+- quarkus.oidc.client-id=recipe-book-service
+- quarkus.oidc.credentials.secret=secret
 
-```shell script
-./gradlew build
-```
+For production, set:
+- MONGODB_CONNECTION_STRING=mongodb://<host>:27017
+- OIDC_AUTH_SERVER_URL=https://<keycloak>/realms/recipe-realm
+- OIDC_CLIENT_SECRET=<secret>
 
-It produces the `quarkus-run.jar` file in the `build/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `build/quarkus-app/lib/` directory.
+## API Examples
+- Create Ingredient (admin):
+  POST /api/ingredients
+  {"name":"Butter","type":"DAIRY","caloriesPer100g":717}
+- Create Recipe (admin):
+  POST /api/recipes
+  {"name":"Scrambled Eggs","category":"BREAKFAST","servings":2,
+   "ingredients":[{"ingredientId":"<ingredientId>","amountGrams":100}],
+   "steps":["Beat eggs","Cook"]}
 
-The application is now runnable using `java -jar build/quarkus-app/quarkus-run.jar`.
-
-If you want to build an _über-jar_, execute the following command:
-
-```shell script
-./gradlew build -Dquarkus.package.jar.type=uber-jar
-```
-
-The application, packaged as an _über-jar_, is now runnable using `java -jar build/*-runner.jar`.
-
-## Creating a native executable
-
-You can create a native executable using:
-
-```shell script
-./gradlew build -Dquarkus.native.enabled=true
-```
-
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
-
-```shell script
-./gradlew build -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./build/recipe-book-service-1.0.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/gradle-tooling>.
-
-## Related Guides
-
-- REST ([guide](https://quarkus.io/guides/rest)): A Jakarta REST implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
-- OpenID Connect Client ([guide](https://quarkus.io/guides/security-openid-connect-client)): Get and refresh access tokens from OpenID Connect providers
-- MongoDB with Panache ([guide](https://quarkus.io/guides/mongodb-panache)): Simplify your persistence code for MongoDB via the active record or the repository pattern
-- SmallRye OpenAPI ([guide](https://quarkus.io/guides/openapi-swaggerui)): Document your REST APIs with OpenAPI - comes with Swagger UI
-- REST Client - OpenID Connect Filter ([guide](https://quarkus.io/guides/security-openid-connect-client)): Use REST Client filter to get and refresh access tokens with OpenId Connect Client and send them as HTTP Authorization Bearer tokens
-- REST Jackson ([guide](https://quarkus.io/guides/rest#json-serialisation)): Jackson serialization support for Quarkus REST. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it
-- OpenID Connect ([guide](https://quarkus.io/guides/security-openid-connect)): Verify Bearer access tokens and authenticate users with Authorization Code Flow
-- Hibernate ORM with Panache ([guide](https://quarkus.io/guides/hibernate-orm-panache)): Simplify your persistence code for Hibernate ORM via the active record or the repository pattern
-- SmallRye Health ([guide](https://quarkus.io/guides/smallrye-health)): Monitor service health
-- RESTEasy Client - OpenID Connect Token Propagation ([guide](https://quarkus.io/guides/security-openid-connect-client)): Use RESTEasy Client filter to propagate the incoming Bearer access token or token acquired from Authorization Code Flow as HTTP Authorization Bearer token
-
-## Provided Code
-
-### Hibernate ORM
-
-Create your first JPA entity
-
-[Related guide section...](https://quarkus.io/guides/hibernate-orm)
-
-[Related Hibernate with Panache section...](https://quarkus.io/guides/hibernate-orm-panache)
-
-
-### REST
-
-Easily start your REST Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
-
-### SmallRye Health
-
-Monitor your application's health using SmallRye Health
-
-[Related guide section...](https://quarkus.io/guides/smallrye-health)
+## Kubernetes
+This app uses standard Quarkus images and properties and can be containerized with the provided Dockerfile. You can convert docker-compose to K8s manifests via Kompose or author manifests/Helm charts. Ensure secrets and env vars are configured in your cluster.

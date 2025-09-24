@@ -1,0 +1,39 @@
+{
+  "realm": "recipe-realm",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      { "name": "user" },
+      { "name": "admin" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "recipe-book-service",
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "secret",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": ["*"],
+      "webOrigins": ["*"]
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [ { "type": "password", "value": "admin", "temporary": false } ],
+      "realmRoles": ["admin"]
+    },
+    {
+      "username": "user",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [ { "type": "password", "value": "user", "temporary": false } ],
+      "realmRoles": ["user"]
+    }
+  ]
+}

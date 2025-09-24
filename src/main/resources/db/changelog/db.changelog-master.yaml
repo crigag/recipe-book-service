@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1-create-collections
+      author: junie
+      changes:
+        - createCollection:
+            collectionName: ingredients
+        - createCollection:
+            collectionName: recipes
+  - changeSet:
+      id: 3-seed-ingredients
+      author: junie
+      changes:
+        - insertOne:
+            collectionName: ingredients
+            document:
+              name: "Sugar"
+              type: "SWEETENER"
+              caloriesPer100g: 387
+        - insertOne:
+            collectionName: ingredients
+            document:
+              name: "Flour"
+              type: "GRAIN"
+              caloriesPer100g: 364
