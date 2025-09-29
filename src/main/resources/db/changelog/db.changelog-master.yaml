@@ -13,13 +13,7 @@ databaseChangeLog:
       changes:
         - insertOne:
             collectionName: ingredients
-            document:
-              name: "Sugar"
-              type: "SWEETENER"
-              caloriesPer100g: 387
+            document: '{"name":"Sugar","type":"SWEETENER","caloriesPer100g":387.0}'
         - insertOne:
             collectionName: ingredients
-            document:
-              name: "Flour"
-              type: "GRAIN"
-              caloriesPer100g: 364
+            document: '{"name":"Flour","type":"GRAIN","caloriesPer100g":364.0}'

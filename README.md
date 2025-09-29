@@ -61,5 +61,21 @@ For production, set:
    "ingredients":[{"ingredientId":"<ingredientId>","amountGrams":100}],
    "steps":["Beat eggs","Cook"]}
 
+## Example with authentication
+
+### 1. Retrieve the token
+
+POST http://localhost:8081/realms/recipe-realm/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials&client_id=recipe-book-service&client_secret=nCN8WWTwSsdSBg1g2aBstZlaEySW0HjY
+
+> {% client.global.set("auth_token", response.body.access_token); %}
+
+### 2. Call to the protect API
+
+GET http://localhost:8080/api/ingredients
+Authorization: Bearer {{auth_token}}
+
 ## Kubernetes
 This app uses standard Quarkus images and properties and can be containerized with the provided Dockerfile. You can convert docker-compose to K8s manifests via Kompose or author manifests/Helm charts. Ensure secrets and env vars are configured in your cluster.
